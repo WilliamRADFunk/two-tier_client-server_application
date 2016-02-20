@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.paint.*?>
 <?import javafx.collections.*?>
 <?import javafx.scene.control.*?>
 <?import java.lang.*?>
@@ -14,44 +15,45 @@
       <RowConstraints />
    </rowConstraints>
    <children>
-      <SplitPane dividerPositions="0.5502008032128514" orientation="VERTICAL" prefHeight="500.0" prefWidth="800.0">
+      <SplitPane dividerPositions="0.5220883534136547" orientation="VERTICAL" prefHeight="500.0" prefWidth="800.0">
          <items>
-              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
+              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0" style="-fx-background-color: #9D538E;">
                  <children>
-                     <Label layoutX="14.0" layoutY="14.0" text="Enter Database Information" />
-                     <Label layoutX="14.0" layoutY="40.0" text="JDBC Driver" />
-                     <Label layoutX="14.0" layoutY="70.0" text="Database URL" />
-                     <Label layoutX="14.0" layoutY="100.0" text="Username" />
-                     <Label layoutX="14.0" layoutY="130.0" text="Password" />
-                     <ChoiceBox fx:id="choice_driver" layoutX="113.0" layoutY="35.0" prefHeight="25.0" prefWidth="232.0" value="com.mysql.jdbc.Driver">
+                     <Label layoutX="25.0" layoutY="14.0" style="-fx-text-fill: #34ACAF; -fx-font-weight: bold;" text="Enter Database Information" />
+                     <Label layoutX="25.0" layoutY="40.0" style="-fx-text-fill: #34ACAF; -fx-font-weight: bold;" text="JDBC Driver" />
+                     <Label layoutX="25.0" layoutY="70.0" style="-fx-text-fill: #34ACAF; -fx-font-weight: bold;" text="Database URL" />
+                     <Label layoutX="25.0" layoutY="100.0" style="-fx-text-fill: #34ACAF; -fx-font-weight: bold;" text="Username" />
+                     <Label layoutX="25.0" layoutY="130.0" style="-fx-text-fill: #34ACAF; -fx-font-weight: bold;" text="Password" />
+                     <ChoiceBox fx:id="choice_driver" layoutX="120.0" layoutY="35.0" prefHeight="25.0" prefWidth="232.0" value="com.mysql.jdbc.Driver">
                         <items>
                             <FXCollections fx:factory="observableArrayList">
                                 <String fx:value="com.mysql.jdbc.Driver" />
                             </FXCollections>
                         </items>
                      </ChoiceBox>
-                     <ChoiceBox layoutX="113.0" layoutY="66.0" prefHeight="25.0" prefWidth="232.0" value="jdbc:mysql://localhost:3310/project3">
+                     <ChoiceBox layoutX="120.0" layoutY="66.0" prefHeight="25.0" prefWidth="232.0" value="jdbc:mysql://localhost:3310/project3">
                         <items>
                             <FXCollections fx:factory="observableArrayList">
                                 <String fx:value="jdbc:mysql://localhost:3310/project3" />
+                                <String fx:value="jdbc:mysql://localhost:3310/bikedb" />
                             </FXCollections>
                         </items>
                      </ChoiceBox>
-                     <TextField fx:id="text_username" layoutX="114.0" layoutY="96.0" prefHeight="25.0" prefWidth="232.0" />
-                     <TextField fx:id="text_password" layoutX="114.0" layoutY="126.0" prefHeight="25.0" prefWidth="232.0" />
-                     <Label layoutX="440.0" layoutY="14.0" text="Enter a SQL Command" />
+                     <TextField fx:id="text_username" layoutX="120.0" layoutY="96.0" prefHeight="25.0" prefWidth="232.0" />
+                     <TextField fx:id="text_password" layoutX="120.0" layoutY="126.0" prefHeight="25.0" prefWidth="232.0" />
+                     <Label layoutX="440.0" layoutY="14.0" style="-fx-text-fill: #34ACAF; -fx-font-weight: bold;" text="Enter a SQL Command" />
                      <TextArea fx:id="text_query" layoutX="440.0" layoutY="39.0" prefHeight="115.0" prefWidth="328.0" />
-                     <Button fx:id="btn_execute" layoutX="618.0" layoutY="197.0" mnemonicParsing="false" onAction="#executeCommand" prefHeight="25.0" prefWidth="150.0" style="-fx-background-color: #00FF00; -fx-border-color: #000000;" text="Execute SQL Command" />
-                     <Button fx:id="btn_clearCommand" layoutX="440.0" layoutY="197.0" mnemonicParsing="false" onAction="#clearCommand" prefHeight="25.0" prefWidth="150.0" style="-fx-border-color: #000000;" text="Clear Command" />
-                     <Button fx:id="btn_connect" layoutX="262.0" layoutY="197.0" mnemonicParsing="false" onAction="#connectDatabase" prefHeight="25.0" prefWidth="150.0" style="-fx-background-color: #0000FF; -fx-border-color: #000000; -fx-text-fill: #FFFFFF;" text="Connect to Database" />
-                     <Label layoutX="14.0" layoutY="250.0" text="SQL Connection Result" />
-                     <Label layoutX="50.0" layoutY="202.0" text="No Connection Now" textFill="RED" />
+                     <Button fx:id="btn_execute" layoutX="600.0" layoutY="197.0" mnemonicParsing="false" onAction="#executeCommand" prefHeight="25.0" prefWidth="175.0" style="-fx-background-color: #692DAC; -fx-border-color: #000000; -fx-text-fill: #34ACAF; -fx-font-weight: bold;" text="Execute SQL Command" />
+                     <Button fx:id="btn_clearCommand" layoutX="400.0" layoutY="197.0" mnemonicParsing="false" onAction="#clearCommand" prefHeight="25.0" prefWidth="175.0" style="-fx-border-color: #000000; -fx-text-fill: #34ACAF; -fx-background-color: #692DAC; -fx-font-weight: bold;" text="Clear Command" />
+                     <Button fx:id="btn_connect" layoutX="200.0" layoutY="197.0" mnemonicParsing="false" onAction="#connectDatabase" prefHeight="25.0" prefWidth="175.0" style="-fx-background-color: #692DAC; -fx-border-color: #000000; -fx-text-fill: #34ACAF; -fx-font-weight: bold;" text="Connect to Database" />
+                     <Label layoutX="25.0" layoutY="235.0" style="-fx-text-fill: #34ACAF; -fx-font-weight: bold;" text="SQL Connection Result" />
+                     <Label fx:id="label_connected" layoutX="25.0" layoutY="170.0" style="-fx-font-weight: bold;" text="No Connection Now" textFill="RED" />
                  </children>
               </AnchorPane>
-              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
+              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0" style="-fx-background-color: #9D538E;">
                  <children>
-                     <TextArea fx:id="text_results" prefHeight="185.0" prefWidth="800.0" />
-                  <Button fx:id="btn_clearResults" layoutX="14.0" layoutY="190.0" mnemonicParsing="false" onAction="#clearResults" prefHeight="25.0" prefWidth="150.0" style="-fx-background-color: #FFFF00; -fx-border-color: #000000;" text="Clear Results Window" />
+                     <TextArea fx:id="text_results" layoutX="25.0" layoutY="10.0" prefHeight="185.0" prefWidth="750.0" />
+                  <Button fx:id="btn_clearResults" layoutX="25.0" layoutY="200.0" mnemonicParsing="false" onAction="#clearResults" prefHeight="25.0" prefWidth="175.0" style="-fx-background-color: #692DAC; -fx-border-color: #000000; -fx-text-fill: #34ACAF; -fx-font-weight: bold;" text="Clear Results Window" />
                  </children>
               </AnchorPane>
          </items>
