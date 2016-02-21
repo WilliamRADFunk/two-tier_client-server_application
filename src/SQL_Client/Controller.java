@@ -6,16 +6,18 @@
 */
 package SQL_Client;
 
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
-import javafx.scene.control.TableColumn;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
 
+import javax.swing.*;
+import java.awt.*;
 import java.net.URL;
 import java.sql.*;
-import java.util.Hashtable;
 import java.util.ResourceBundle;
 
 public class Controller implements Initializable
@@ -26,6 +28,7 @@ public class Controller implements Initializable
     Connection connection = null;
     PreparedStatement preparedStatement = null;
     private boolean isDatabaseConnected = false;
+
 
     @FXML
     private Button btn_execute;
@@ -42,7 +45,7 @@ public class Controller implements Initializable
     @FXML
     private TextArea text_query;
     @FXML
-    private TableView table_results;
+    private TextArea text_results;
     @FXML
     private ChoiceBox choice_driver;
     @FXML
@@ -59,7 +62,7 @@ public class Controller implements Initializable
         assert text_password != null : "fx:id=\"text_password\" was not injected: check your FXML file 'balanceSheet.fxml'.";
         text_password.setText("root");
         assert text_query != null : "fx:id=\"text_query\" was not injected: check your FXML file 'balanceSheet.fxml'.";
-        assert table_results != null : "fx:id=\"table_results\" was not injected: check your FXML file 'balanceSheet.fxml'.";
+        assert text_results != null : "fx:id=\"text_results\" was not injected: check your FXML file 'balanceSheet.fxml'.";
         assert choice_driver != null : "fx:id=\"choice_driver\" was not injected: check your FXML file 'balanceSheet.fxml'.";
         assert label_connected != null : "fx:id=\"label_connected\" was not injected: check your FXML file 'balanceSheet.fxml'.";
     }
@@ -96,7 +99,6 @@ public class Controller implements Initializable
             }
             catch ( SQLException sqlException )
             {
-                sqlException.printStackTrace();
                 Alert alert = new Alert(Alert.AlertType.WARNING);
                 alert.setTitle("Invalid query!");
                 alert.setHeaderText(sqlException.getMessage());
@@ -125,30 +127,26 @@ public class Controller implements Initializable
                     // obtain meta data for ResultSet
                     ResultSetMetaData metaData = rset.getMetaData();
 
-                    for(int i = 1; i < metaData.getColumnCount(); i++)
+                    for(int i = 1; i <= metaData.getColumnCount(); i++)
                     {
-                        TableColumn tc = new TableColumn(metaData.getColumnName(i));
-                        tc.setMinWidth(200);
-                        table_results.getColumns().add(tc);
+                        text_results.appendText(metaData.getColumnName(i));
+                        int whiteSpaceLength = (25 - metaData.getColumnName(i).length());
+                        text_results.appendText(addRepeatChar(whiteSpaceLength, ' '));
                     }
-                    ObservableList<TableRow> data = FXCollections.observableArrayList();
+                    text_results.appendText("\n" + addRepeatChar(25 * metaData.getColumnCount(), '~') + "\n");
                     while(rset.next())
                     {
-                        TableRow row;
-                        row = new TableRow();
                         for(int j = 1; j <= metaData.getColumnCount(); j++)
                         {
-                            TableCell cell = new TableCell();
-                            row.setItem(rset.getObject(j));
-                            break;
+                            text_results.appendText(rset.getString(j));
+                            int whiteSpaceLength = (25 - rset.getString(j).length());
+                            text_results.appendText(addRepeatChar(whiteSpaceLength, ' '));
                         }
-                        data.add(row);
+                        text_results.appendText("\n" + addRepeatChar(25 * metaData.getColumnCount(), '-') + "\n");
                     }
-                    table_results.setItems(data);
                 }
                 catch ( SQLException sqlException )
                 {
-                    sqlException.printStackTrace();
                     Alert alert = new Alert(Alert.AlertType.WARNING);
                     alert.setTitle("Invalid SELECT query!");
                     alert.setHeaderText(sqlException.getMessage());
@@ -189,7 +187,6 @@ public class Controller implements Initializable
                 }
                 catch ( SQLException sqlException )
                 {
-                    sqlException.printStackTrace();
                     Alert alert = new Alert(Alert.AlertType.WARNING);
                     alert.setTitle("Invalid query!");
                     alert.setHeaderText(sqlException.getMessage());
@@ -229,7 +226,7 @@ public class Controller implements Initializable
     @FXML
     private void clearResults()
     {
-        //table_results.set
+        text_results.setText("");
     }
     // Attempts to make a connection/disconnection with the user-defined database
     @FXML
@@ -250,7 +247,6 @@ public class Controller implements Initializable
             }
             catch ( Exception e )
             {
-                e.printStackTrace();
                 Alert alert = new Alert(Alert.AlertType.WARNING);
                 alert.setTitle("Failed to disconnect to the database!");
                 alert.setHeaderText(e.getMessage());
@@ -278,7 +274,6 @@ public class Controller implements Initializable
             }
             catch ( Exception e )
             {
-                e.printStackTrace();
                 Alert alert = new Alert(Alert.AlertType.WARNING);
                 alert.setTitle("Failed to connect to the database!");
                 alert.setHeaderText(e.getMessage());
@@ -287,5 +282,15 @@ public class Controller implements Initializable
                 alert.showAndWait();
             }
         }
+    }
+    // Returns a string of a variable number of repeated characters.
+    private String addRepeatChar(int num, char ch)
+    {
+        String space = "";
+        for(int i = 0; i < num; i++)
+        {
+            space += ch;
+        }
+        return space;
     }
 }

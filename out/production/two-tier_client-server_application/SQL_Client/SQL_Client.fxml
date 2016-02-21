@@ -53,7 +53,7 @@
               <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0" style="-fx-background-color: #9D538E;">
                  <children>
                   <Button fx:id="btn_clearResults" layoutX="25.0" layoutY="200.0" mnemonicParsing="false" onAction="#clearResults" prefHeight="25.0" prefWidth="175.0" style="-fx-background-color: #692DAC; -fx-border-color: #000000; -fx-text-fill: #34ACAF; -fx-font-weight: bold;" text="Clear Results Window" />
-                  <TableView fx:id="table_results" layoutX="25.0" layoutY="10.0" prefHeight="180.0" prefWidth="750.0" />
+                  <TextArea fx:id="text_results" layoutX="25.0" layoutY="10.0" prefHeight="180.0" prefWidth="750.0" style="-fx-font-family: monospace;" />
                  </children>
               </AnchorPane>
          </items>
