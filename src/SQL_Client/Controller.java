@@ -6,12 +6,16 @@
 */
 package SQL_Client;
 
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
+import javafx.scene.control.TableColumn;
 
 import java.net.URL;
 import java.sql.*;
+import java.util.Hashtable;
 import java.util.ResourceBundle;
 
 public class Controller implements Initializable
@@ -21,7 +25,6 @@ public class Controller implements Initializable
     static final String DATABASE_URL = "jdbc:mysql://localhost:3310/project3";
     Connection connection = null;
     PreparedStatement preparedStatement = null;
-    private ResultSetMetaData metaData;
     private boolean isDatabaseConnected = false;
 
     @FXML
@@ -39,7 +42,7 @@ public class Controller implements Initializable
     @FXML
     private TextArea text_query;
     @FXML
-    private TextArea text_results;
+    private TableView table_results;
     @FXML
     private ChoiceBox choice_driver;
     @FXML
@@ -56,7 +59,7 @@ public class Controller implements Initializable
         assert text_password != null : "fx:id=\"text_password\" was not injected: check your FXML file 'balanceSheet.fxml'.";
         text_password.setText("root");
         assert text_query != null : "fx:id=\"text_query\" was not injected: check your FXML file 'balanceSheet.fxml'.";
-        assert text_results != null : "fx:id=\"text_results\" was not injected: check your FXML file 'balanceSheet.fxml'.";
+        assert table_results != null : "fx:id=\"table_results\" was not injected: check your FXML file 'balanceSheet.fxml'.";
         assert choice_driver != null : "fx:id=\"choice_driver\" was not injected: check your FXML file 'balanceSheet.fxml'.";
         assert label_connected != null : "fx:id=\"label_connected\" was not injected: check your FXML file 'balanceSheet.fxml'.";
     }
@@ -83,7 +86,6 @@ public class Controller implements Initializable
             alert.getDialogPane().setStyle(" -fx-max-width:500px; -fx-pref-width: 500px;");
 
             alert.showAndWait();
-            return;
         }
         else
         {
@@ -95,11 +97,22 @@ public class Controller implements Initializable
             catch ( SQLException sqlException )
             {
                 sqlException.printStackTrace();
+                Alert alert = new Alert(Alert.AlertType.WARNING);
+                alert.setTitle("Invalid query!");
+                alert.setHeaderText(sqlException.getMessage());
+                alert.getDialogPane().setStyle(" -fx-max-width:500px; -fx-pref-width: 500px;");
+
+                alert.showAndWait();
                 return;
-            } // end catch
+            }
             catch (Exception e)
             {
-                System.out.println("Other exception: " + e);
+                Alert alert = new Alert(Alert.AlertType.WARNING);
+                alert.setTitle("Unexpected Error!");
+                alert.setHeaderText(e.getMessage());
+                alert.getDialogPane().setStyle(" -fx-max-width:500px; -fx-pref-width: 500px;");
+
+                alert.showAndWait();
                 return;
             }
             // If user started query with SELECT, an attempt to select the data and print to results section is made.
@@ -110,166 +123,88 @@ public class Controller implements Initializable
                     preparedStatement = connection.prepareStatement(query);
                     ResultSet rset = preparedStatement.executeQuery();
                     // obtain meta data for ResultSet
-                    metaData = rset.getMetaData();
+                    ResultSetMetaData metaData = rset.getMetaData();
 
                     for(int i = 1; i < metaData.getColumnCount(); i++)
                     {
-                        System.out.print(metaData.getColumnName(i));
-                        text_results.setText(text_results.getText() + metaData.getColumnName(i));
-                        if(i != metaData.getColumnCount() - 1)
-                        {
-                            text_results.setText(text_results.getText() + "\t\t\t");
-                            System.out.print("\t\t\t");
-                        }
+                        TableColumn tc = new TableColumn(metaData.getColumnName(i));
+                        tc.setMinWidth(200);
+                        table_results.getColumns().add(tc);
                     }
-                    text_results.setText(text_results.getText() + "\n");
-                    System.out.println("");
+                    ObservableList<TableRow> data = FXCollections.observableArrayList();
                     while(rset.next())
                     {
-                        text_results.setText(text_results.getText() + rset.getString(1) + "\t\t\t" + rset.getString(2) + "\t\t\t" + rset.getString(3) + "\n");
-                        System.out.println(rset.getString(1) + "\t\t\t" + rset.getString(2) + "\t\t\t" + rset.getString(3));
+                        TableRow row;
+                        row = new TableRow();
+                        for(int j = 1; j <= metaData.getColumnCount(); j++)
+                        {
+                            TableCell cell = new TableCell();
+                            row.setItem(rset.getObject(j));
+                            break;
+                        }
+                        data.add(row);
                     }
+                    table_results.setItems(data);
                 }
                 catch ( SQLException sqlException )
                 {
                     sqlException.printStackTrace();
                     Alert alert = new Alert(Alert.AlertType.WARNING);
                     alert.setTitle("Invalid SELECT query!");
-                    alert.setHeaderText("Make sure you've entered valid MySQL syntax for a SELECT query.");
+                    alert.setHeaderText(sqlException.getMessage());
                     alert.getDialogPane().setStyle(" -fx-max-width:500px; -fx-pref-width: 500px;");
 
                     alert.showAndWait();
-                    return;
                 }
                 catch (Exception e)
                 {
-                    System.out.println("Other exception: " + e);
                     Alert alert = new Alert(Alert.AlertType.WARNING);
                     alert.setTitle("Unexpected Error!");
-                    alert.setHeaderText("" + e);
+                    alert.setHeaderText(e.getMessage());
                     alert.getDialogPane().setStyle(" -fx-max-width:500px; -fx-pref-width: 500px;");
 
                     alert.showAndWait();
-                    return;
                 }
             }
             // If user started query with DELETE, an attempt to select the data and print to results section is made.
-            else if(query.length() >= 6 && query.substring(0,6).toUpperCase().equals("DELETE"))
+            else if(query.length() >= 6)
             {
                 try
                 {
                     preparedStatement = connection.prepareStatement(query);
+                    preparedStatement.executeUpdate();
+
+                    String queryType = "";
+                    if(query.substring(0,6).toUpperCase().equals("INSERT")) queryType = "INSERT";
+                    else if(query.substring(0,6).toUpperCase().equals("DELETE")) queryType = "DELETE";
+                    else if(query.substring(0,6).toUpperCase().equals("UPDATE")) queryType = "UPDATE";
+                    else if(query.substring(0,4).toUpperCase().equals("DROP")) queryType = "DROP";
+
+                    Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                    alert.setTitle("Success!");
+                    alert.setHeaderText("Your " + queryType + " query was successful.");
+                    alert.getDialogPane().setStyle(" -fx-max-width:500px; -fx-pref-width: 500px;");
+
+                    alert.showAndWait();
                 }
                 catch ( SQLException sqlException )
                 {
                     sqlException.printStackTrace();
                     Alert alert = new Alert(Alert.AlertType.WARNING);
-                    alert.setTitle("Invalid DELETE query!");
-                    alert.setHeaderText("Make sure you've entered valid MySQL syntax for a DELETE query.");
+                    alert.setTitle("Invalid query!");
+                    alert.setHeaderText(sqlException.getMessage());
                     alert.getDialogPane().setStyle(" -fx-max-width:500px; -fx-pref-width: 500px;");
 
                     alert.showAndWait();
-                    return;
                 }
                 catch (Exception e)
                 {
-                    System.out.println("Other exception: " + e);
                     Alert alert = new Alert(Alert.AlertType.WARNING);
                     alert.setTitle("Unexpected Error!");
-                    alert.setHeaderText("" + e);
+                    alert.setHeaderText(e.getMessage());
                     alert.getDialogPane().setStyle(" -fx-max-width:500px; -fx-pref-width: 500px;");
 
                     alert.showAndWait();
-                    return;
-                }
-            }
-            // If user started query with INSERT, an attempt to select the data and print to results section is made.
-            else if(query.length() >= 6 && query.substring(0,6).toUpperCase().equals("INSERT"))
-            {
-                try
-                {
-                    preparedStatement = connection.prepareStatement(query);
-                }
-                catch ( SQLException sqlException )
-                {
-                    sqlException.printStackTrace();
-                    Alert alert = new Alert(Alert.AlertType.WARNING);
-                    alert.setTitle("Invalid INSERT query!");
-                    alert.setHeaderText("Make sure you've entered valid MySQL syntax for a INSERT query.");
-                    alert.getDialogPane().setStyle(" -fx-max-width:500px; -fx-pref-width: 500px;");
-
-                    alert.showAndWait();
-                    return;
-                }
-                catch (Exception e)
-                {
-                    System.out.println("Other exception: " + e);
-                    Alert alert = new Alert(Alert.AlertType.WARNING);
-                    alert.setTitle("Unexpected Error!");
-                    alert.setHeaderText("" + e);
-                    alert.getDialogPane().setStyle(" -fx-max-width:500px; -fx-pref-width: 500px;");
-
-                    alert.showAndWait();
-                    return;
-                }
-            }
-            // If user started query with UPDATE, an attempt to select the data and print to results section is made.
-            else if(query.length() >= 6 && query.substring(0,6).toUpperCase().equals("UPDATE"))
-            {
-                try
-                {
-                    preparedStatement = connection.prepareStatement(query);
-                }
-                catch ( SQLException sqlException ) {
-                    sqlException.printStackTrace();
-                    Alert alert = new Alert(Alert.AlertType.WARNING);
-                    alert.setTitle("Invalid UPDATE query!");
-                    alert.setHeaderText("Make sure you've entered valid MySQL syntax for a UPDATE query.");
-                    alert.getDialogPane().setStyle(" -fx-max-width:500px; -fx-pref-width: 500px;");
-
-                    alert.showAndWait();
-                    return;
-                }
-                catch (Exception e)
-                {
-                    System.out.println("Other exception: " + e);
-                    Alert alert = new Alert(Alert.AlertType.WARNING);
-                    alert.setTitle("Unexpected Error!");
-                    alert.setHeaderText("" + e);
-                    alert.getDialogPane().setStyle(" -fx-max-width:500px; -fx-pref-width: 500px;");
-
-                    alert.showAndWait();
-                    return;
-                }
-            }
-            // If user started query with DROP, an attempt to select the data and print to results section is made.
-            else if(query.length() >= 4 && query.substring(0,4).toUpperCase().equals("DROP"))
-            {
-                try
-                {
-                    preparedStatement = connection.prepareStatement(query);
-                }
-                catch ( SQLException sqlException )
-                {
-                    sqlException.printStackTrace();
-                    Alert alert = new Alert(Alert.AlertType.WARNING);
-                    alert.setTitle("Invalid DROP query!");
-                    alert.setHeaderText("Make sure you've entered valid MySQL syntax for a DROP query.");
-                    alert.getDialogPane().setStyle(" -fx-max-width:500px; -fx-pref-width: 500px;");
-
-                    alert.showAndWait();
-                    return;
-                }
-                catch (Exception e)
-                {
-                    System.out.println("Other exception: " + e);
-                    Alert alert = new Alert(Alert.AlertType.WARNING);
-                    alert.setTitle("Unexpected Error!");
-                    alert.setHeaderText("" + e);
-                    alert.getDialogPane().setStyle(" -fx-max-width:500px; -fx-pref-width: 500px;");
-
-                    alert.showAndWait();
-                    return;
                 }
             }
             else
@@ -294,7 +229,7 @@ public class Controller implements Initializable
     @FXML
     private void clearResults()
     {
-        text_results.setText("");
+        //table_results.set
     }
     // Attempts to make a connection/disconnection with the user-defined database
     @FXML
@@ -313,16 +248,15 @@ public class Controller implements Initializable
                 label_connected.setText("No Connection Now");
                 isDatabaseConnected = false;
             }
-            catch ( Exception exception )
+            catch ( Exception e )
             {
-                exception.printStackTrace();
+                e.printStackTrace();
                 Alert alert = new Alert(Alert.AlertType.WARNING);
                 alert.setTitle("Failed to disconnect to the database!");
-                alert.setHeaderText("" + e);
+                alert.setHeaderText(e.getMessage());
                 alert.getDialogPane().setStyle(" -fx-max-width:500px; -fx-pref-width: 500px;");
 
                 alert.showAndWait();
-                return;
             }
         }
         // Connect with the database
@@ -342,16 +276,15 @@ public class Controller implements Initializable
                 label_connected.setText("Connected to " + DATABASE_URL);
                 isDatabaseConnected = true;
             }
-            catch ( Exception exception )
+            catch ( Exception e )
             {
-                exception.printStackTrace();
+                e.printStackTrace();
                 Alert alert = new Alert(Alert.AlertType.WARNING);
                 alert.setTitle("Failed to connect to the database!");
-                alert.setHeaderText("" + e);
+                alert.setHeaderText(e.getMessage());
                 alert.getDialogPane().setStyle(" -fx-max-width:500px; -fx-pref-width: 500px;");
 
                 alert.showAndWait();
-                return;
             }
         }
     }
